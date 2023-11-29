@@ -11,7 +11,7 @@ from spikingjelly.activation_based import layer, base, neuron, surrogate
 class ResBlock(nn.Module):
     def __init__(self, n_inputs, n_outputs, kernel_size, stride, avg_pan=0, dropout=0.2):
         super(ResBlock, self).__init__()
-        norm_layer = BatchNorm1d
+        norm_layer = BatchNorm2d
         self.conv1 = conv(n_inputs, n_outputs, kernel_size,
                           stride=stride, padding=(kernel_size - 1) // 2, dilation=1)
         self.bn1 = norm_layer(n_outputs)

@@ -1,5 +1,5 @@
 import os
-from typing import Callable, Tuple, Dict, Optional
+from typing import Callable, Tuple, Dict, Optional, Any
 from pathlib import Path
 
 import librosa
@@ -21,8 +21,7 @@ import torchaudio
 import torchaudio.transforms as transforms
 import torch
 
-
-sr=16000
+sr = 16000
 
 
 # 加载音频数据（假设waveform是一个Tensor表示的音频波形）
@@ -76,7 +75,7 @@ TEST_RECORD = "testing_list.txt"
 TRAIN_RECORD = "training_list.txt"
 
 
-def load_speechcommands_item(relpath: str, path: str) -> Tuple[Tensor, int, str, str, int]:
+def load_speechcommands_item(relpath: str, path: str) -> tuple[Any, str]:
     filepath = os.path.join(path, relpath)
     label, filename = os.path.split(relpath)
     speaker, _ = os.path.splitext(filename)
@@ -91,7 +90,7 @@ def load_speechcommands_item(relpath: str, path: str) -> Tuple[Tensor, int, str,
     # return waveform, sample_rate, label, speaker_id, utterance_number
     mfcc_features = np.load(filepath)
 
-    return mfcc_features
+    return mfcc_features, label
 
 
 class SPEECHCOMMANDS(Dataset):
@@ -238,7 +237,7 @@ class SPEECHCOMMANDS(Dataset):
         if n < len(self._walker):
             fileid = self._walker[n]
             # waveform, sample_rate, label, speaker_id, utterance_number = load_speechcommands_item(fileid, self._path)
-            mfcc_features=load_speechcommands_item(fileid, self._path)
+            mfcc_features, label = load_speechcommands_item(fileid, self._path)
             # print(waveform.shape)
         else:
             # Silence data are randomly and dynamically generated from noise data
@@ -246,7 +245,6 @@ class SPEECHCOMMANDS(Dataset):
             # Load random noise
             noisepath = os.path.join(self._path, choice(self.noise_list))
             waveform, sample_rate = torchaudio.load(noisepath)
-
 
             # Random crop
             offset = np.random.randint(waveform.shape[1] - self.silence_size)
@@ -277,14 +275,10 @@ class SPEECHCOMMANDS(Dataset):
         # waveform=waveform1.reshape(1,16000)
 
         # waveform = mfcc.reshape(1, 1, 46, 161)
-        waveform=mfcc_features.reshape(1,1,46,161)
-
-
+        waveform = mfcc_features.reshape(1, 46, 161)
 
         label = self.label_dict.get(label)
         return waveform, label
 
     def __len__(self) -> int:
         return len(self._walker) + self.silence_cnt
-
-

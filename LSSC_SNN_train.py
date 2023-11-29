@@ -3,8 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.cuda import amp
 from spikingjelly.activation_based import functional, surrogate, layer, neuron
-from spikingjelly.datasets.dvs128_gesture import DVS128Gesture
-from torch.utils.data import DataLoader
+
 from torch.utils.tensorboard import SummaryWriter
 import time
 import os
@@ -15,6 +14,7 @@ import numpy as np
 
 import data_deal
 import model
+import dconv2d
 
 
 # import model1
@@ -49,7 +49,8 @@ def main():
 
     args = parser.parse_args()
     print(args)
-    net = model.incoder_decoder()
+    # net = model.incoder_decoder()
+    net=dconv2d.BackEndNet()
     print(net)
     net = nn.DataParallel(net)
     net.to(device)
