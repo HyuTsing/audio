@@ -43,15 +43,15 @@ class FeedBackNet(nn.Module):
         for i in range(4):
             a1 = self.conv1(input)
             a2 = self.conv1a(input)
-            a3 = a1 * a2
+            a3 = a1 + a2
             b1 = self.conv2(a3)
             b2 = self.conv2a(a3)
-            b3 = b1 * b2
+            b3 = b1 + b2
             c1 = self.conv3(b3)
             c2 = self.conv3a(b3)
-            c3 = c1 * c2
+            c3 = c1 + c2
             c3 = self.bn(c3)
-            input = x * c3
+            input = x + c3
         sa = self.sa(c3)
         output = sa * c3
         output=self.back(output)
