@@ -166,7 +166,8 @@ class SPEECHCOMMANDS(Dataset):
         folder_in_archive = os.path.join(folder_in_archive, basename)
 
         self._path = os.path.join(root, folder_in_archive)
-
+        self._path = self._path.replace("/", os.path.sep)
+        self._path = self._path.replace("\\", os.path.sep)
         self.noise_list = sorted(str(p) for p in Path(self._path).glob('_background_noise_/*.wav'))
         print(self._path)
         if download:
