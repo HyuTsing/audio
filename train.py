@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.cuda import amp
 from spikingjelly.activation_based import functional, surrogate, layer, neuron
-
+from torchstat import stat
 from torch.utils.tensorboard import SummaryWriter
 import time
 import os
@@ -51,14 +51,14 @@ def main():
     print(args)
     # net = model.incoder_decoder()
     net=dconv2d.BackEndNet()
-    print(net)
+    stat(net,(1,46,161))
     net = nn.DataParallel(net)
     net.to(device)
     optimizer = None
     if args.opt == 'SGD':
         optimizer = torch.optim.SGD(net.parameters(), lr=args.lr, momentum=args.momentum)
     elif args.opt == 'Adam':
-        optimizer = torch.optim.Adam(net.parameters(), lr=args.lr)
+        optimizer = torch.optim.Adam(net.parameters(), lr=args.lr,weight_decay=1e-7)
     else:
         raise NotImplementedError(args.opt)
     lr_scheduler = None

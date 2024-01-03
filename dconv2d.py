@@ -46,14 +46,14 @@ class FeedBackNet(nn.Module):
         self.conv4a = nn.Conv2d(64, 16, 5, 1, 2)
         # self.conv4b = nn.Conv2d(64, 8, 7, 1, 3)
         # self.conv4c = nn.Conv2d(64, 8, 9, 1, 4)
-        #layers_5
+        # layers_5
         self.conv5 = nn.Conv2d(32, 8, 3, 1, 1)
         self.conv5a = nn.Conv2d(32, 8, 5, 1, 2)
         # self.conv5b = nn.Conv2d(32, 4, 7, 1, 3)
         # self.conv5c = nn.Conv2d(32, 4, 9, 1, 4)
         self.sa = SpatialAttention()
-        self.conv_back1 = nn.Conv2d(16, 16, 5, 2, 0)
-        self.conv_back2 = nn.Conv2d(16, 16, 3, 2, 0)
+        self.conv_back1 = nn.Conv2d(16, 12, 5, 2, 0)
+        self.conv_back2 = nn.Conv2d(12, 8, 3, 2, 0)
         self.back = nn.Sequential(self.conv_back1, self.conv_back2)
         self.sn1 = neuron.ParametricLIFNode(surrogate_function=surrogate.ATan(), detach_reset=True)
 
@@ -65,39 +65,39 @@ class FeedBackNet(nn.Module):
             a2 = self.conv1a(input)
             # a3=self.conv1b(input)
             # a4=self.conv1c(input)
-            a5=torch.cat((a1,a2
-                          # ,a3,a4
-                          ),dim=1)
+            a5 = torch.cat((a1, a2
+                            # ,a3,a4
+                            ), dim=1)
             b1 = self.conv2(a5)
             b2 = self.conv2a(a5)
             # b3 = self.conv2b(a5)
             # b4=self.conv2c(a5)
-            b5=torch.cat((b1,b2
-                          # ,b3,b4
-                          ),dim=1)
+            b5 = torch.cat((b1, b2
+                            # ,b3,b4
+                            ), dim=1)
             c1 = self.conv3(b5)
             c2 = self.conv3a(b5)
             # c3 = self.conv3b(b5)
             # c4 = self.conv3c(b5)
-            c5=torch.cat((c1,c2
-                          # ,c3,c4
-                          ),dim=1)
+            c5 = torch.cat((c1, c2
+                            # ,c3,c4
+                            ), dim=1)
             d1 = self.conv4(c5)
             d2 = self.conv4a(c5)
             # d3 = self.conv4b(c5)
             # d4 = self.conv4c(c5)
-            d5=torch.cat((d1,d2
-                          # ,d3,d4
-                          ),dim=1)
+            d5 = torch.cat((d1, d2
+                            # ,d3,d4
+                            ), dim=1)
             e1 = self.conv5(d5)
             e2 = self.conv5a(d5)
             # e3 = self.conv5b(d5)
             # e4 = self.conv5c(d5)
-            e5=torch.cat((e1,e2
-                          # ,e3,e4
-                          ),dim=1)
+            e5 = torch.cat((e1, e2
+                            # ,e3,e4
+                            ), dim=1)
             e5 = self.bn(e5)
-            e5=self.sn1(e5)
+            e5 = self.sn1(e5)
             input = x + e5
         sa = self.sa(e5)
         output = sa * e5
@@ -153,13 +153,15 @@ class BackEndNet(nn.Module):
         self.convnet = ConvNet()
         self.flat = nn.Flatten()
         # self.lin1=nn.Linear(36*12*41,12*41)
-        self.lin1 = nn.Linear(6240, 1560)
+        self.lin1 = nn.Linear(3120, 2048)
         self.sn1 = neuron.ParametricLIFNode(surrogate_function=surrogate.ATan(), detach_reset=True)
-        self.lin2 = nn.Linear(1560, 12 * 41)
+        self.lin2 = nn.Linear(2048, 12 * 41)
         self.sn2 = neuron.ParametricLIFNode(surrogate_function=surrogate.ATan(), detach_reset=True)
         self.lin3 = nn.Linear(12 * 41, 35)
         self.sn3 = neuron.ParametricLIFNode(surrogate_function=surrogate.ATan(), detach_reset=True)
-        self.fc = nn.Sequential(self.flat, self.lin1, self.sn1, self.lin2, self.sn2, self.lin3, self.sn3)
+        self.dropout1 = nn.Dropout(0.3)
+        self.dropout2 = nn.Dropout(0.2)
+        self.fc = nn.Sequential(self.flat, self.lin1, self.sn1, self.dropout1, self.lin2, self.sn2,self.dropout2, self.lin3, self.sn3)
 
     def forward(self, x: torch.Tensor):
         a = 1.1
